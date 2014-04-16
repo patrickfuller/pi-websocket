@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>pi-websocket</title>
+    <link href="static/style.css" rel="stylesheet" type="text/css" />
+
+    <script src="static/lib/jquery-1.10.2.min.js"> type="text/javascript"></script>
+    <script src="static/lib/socket.io.js" type="text/javascript"></script>
+    <script src="static/client.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1>Controlling an LED with websockets</h1>
+    <button class="submit" onclick="javascript:client.toggle_led()">Toggle LED</button>
+    <div class="answer"></div>
+
+    <script type="text/javascript">
+      // Connect a websocket to the server. The port notation is post-
+      // processed server-side according to the config
+      client.connect(%(port)d);
+    </script>
+  </body>
+</html>
