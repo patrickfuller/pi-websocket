@@ -1,4 +1,4 @@
-/*global io, $, window, console, alert, Blob, saveAs*/
+/*global WebSocket, $, window, console, alert, Blob, saveAs*/
 "use strict";
 
 /**
@@ -8,32 +8,39 @@ var client = {
     queue: {},
     led_on: false,
 
-    // Connects to Python via a socketio-zeromq bridge
-    connect: function (http_port) {
-        this.socket = new io.Socket(window.location.hostname,
-                                    {port: http_port, rememberTransport: false});
-        this.socket.connect();
-
-        this.socket.on("connect", function () {
-            console.log("Connected!");
-        });
-
+    // Connects to Python through the websocket
+    connect: function (port) {
         var self = this;
-        this.socket.on("message", function (data) {
-            var router, current, updated;
-            router = self.queue[data.id];
-            delete self.queue[data.id];
-            self.result = data.result;
+        this.socket = new WebSocket("ws://" + window.location.hostname + ":" + port + "/websocket");
 
-            if (data.error) {
-                alert(data.result);
+        this.socket.onopen = function () {
+            console.log("Connected!");
+        };
+
+        this.socket.onmessage = function (messageEvent) {
+            var router, current, updated, jsonRpc;
+
+            jsonRpc = JSON.parse(messageEvent.data);
+            router = self.queue[jsonRpc.id];
+            delete self.queue[jsonRpc.id];
+            self.result = jsonRpc.result;
+
+            // Alert on error
+            if (jsonRpc.error) {
+                alert(jsonRpc.result);
+
+            // If the server returns, change the LED message. Note that this
+            // is unnecessary complexity, but I want to show off how to extend
+            // server response handling.
             } else if (router === "toggle_led") {
                 $(".answer").html("LED is currently " + (self.led_on ?
                                   "on" : "off") + ".");
+
+            // No other functions should exist
             } else {
                 alert("Unsupported function: " + router);
             }
-        });
+        };
     },
 
     // Generates a unique identifier for request ids
@@ -50,7 +57,7 @@ var client = {
     toggle_led: function () {
         this.led_on = !this.led_on;
         var uuid = this.uuid();
-        this.socket.send({method: "toggle_led", id: uuid, params: {on: this.led_on}});
+        this.socket.send(JSON.stringify({method: "toggle_led", id: uuid, params: {on: this.led_on}}));
         this.queue[uuid] = "toggle_led";
     }
 };

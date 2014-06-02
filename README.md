@@ -16,6 +16,9 @@ structures ([source](http://stackoverflow.com/questions/14703627/websockets-prot
 This protocol may be more complex to set up for the first time, but working
 with it is clean and simple.
 
+This library does not use websocket wrappers like [socket.io](http://socket.io/)
+or fallback protocols like Flash. This is pure websocket. As such, it requires
+using a [supported browser](http://en.wikipedia.org/wiki/WebSocket).
 
 Requirements
 ============
@@ -27,7 +30,7 @@ Get a raspberry pi. Wire an LED to it like so:
 Open a terminal in your pi, and install these Python dependencies:
 
 ```
-pip install pyzmq tornado tornadio RPi.GPIO
+pip install tornado RPi.GPIO
 ```
 
 Then clone this repository:
